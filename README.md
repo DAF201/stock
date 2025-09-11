@@ -73,3 +73,8 @@ Topics
 Notes
 - This is a minimal, modular scaffold aligned with the requirements and safe defaults.
 - Extend collectors (GDELT, SEC), add fundamentals, and harden risk/portfolio logic per your needs.
+
+Tests
+- Smoke test (short run): `python -m wave.tests.test_smoke`
+- Full test (with one-off fundamentals fetch): `python -m wave.tests.full_test`
+- DB counts helper: `python -m wave.tests.db_counts`
