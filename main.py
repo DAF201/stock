@@ -11,6 +11,7 @@ from .services.analysis_engine import UnifiedAnalysisEngine
 from .services.trade_execution import TradeExecutionManager
 from .services.portfolio_monitor import PortfolioMonitor
 from .services.adaptive_learning import AdaptiveLearning
+from .services.fundamentals_service import FundamentalsService
 from .utils.symbols import get_sp500_symbols
 from .core.settings import Settings
 
@@ -32,6 +33,7 @@ async def main(symbols: List[str] | None = None) -> None:
     tr = TradeExecutionManager(bus)
     pf = PortfolioMonitor(bus)
     rl = AdaptiveLearning(bus)
+    fn = FundamentalsService(bus, symbols) if settings.fundamentals_enabled else None
 
     await asyncio.gather(
         data.run(),
@@ -41,6 +43,7 @@ async def main(symbols: List[str] | None = None) -> None:
         tr.run(),
         pf.run(),
         rl.run(),
+        *( [fn.run()] if fn else [] ),
     )
 
 

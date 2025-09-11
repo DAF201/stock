@@ -59,6 +59,23 @@ def init_db() -> None:
     )
     cur.execute(
         """
+        CREATE TABLE IF NOT EXISTS fundamentals (
+            symbol TEXT,
+            ts TEXT,
+            pe REAL,
+            pb REAL,
+            peg REAL,
+            revenue_growth REAL,
+            eps_growth REAL,
+            debt_to_equity REAL,
+            profit_margin REAL,
+            score REAL,
+            details TEXT
+        )
+        """
+    )
+    cur.execute(
+        """
         CREATE TABLE IF NOT EXISTS analysis (
             symbol TEXT,
             ts TEXT,

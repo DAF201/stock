@@ -12,6 +12,7 @@ class UnifiedAnalysisEngine:
         # caches by symbol
         self._last_ind: Dict[str, dict] = {}
         self._last_sent: Dict[str, dict] = {}
+        self._last_fund: Dict[str, dict] = {}
         self._weights: Weights = load_latest_weights()
 
     async def run(self) -> None:
@@ -36,7 +37,14 @@ class UnifiedAnalysisEngine:
                 except Exception:
                     pass
 
-        await asyncio.gather(handle_ind(), handle_sent(), handle_weights())
+        async def handle_fund():
+            async for f in self.bus.subscribe("fundamentals.processed"):
+                sym = f.get("symbol")
+                if sym:
+                    self._last_fund[sym] = f
+                    await self._maybe_emit(sym, f["ts"])
+
+        await asyncio.gather(handle_ind(), handle_sent(), handle_weights(), handle_fund())
 
     async def _maybe_emit(self, symbol: Optional[str], ts: str) -> None:
         if not symbol:
@@ -87,9 +95,14 @@ class UnifiedAnalysisEngine:
         if sent:
             sent_score = float(sent.get("impact", 0.0)) * 100.0  # map -1..1 to -100..100
             reasons.append(f"Sentiment impact {sent.get('impact', 0.0):.2f}")
+        fund_score = 0.0
+        fund = self._last_fund.get(symbol)
+        if fund:
+            fund_score = float(fund.get("score", 0.0))
+            reasons.append("Fundamentals score present")
 
         w = self._weights.normalized()
-        composite = w.tech * tech_score + w.fundamental * 0.0 + w.context * sent_score
+        composite = w.tech * tech_score + w.fundamental * fund_score + w.context * sent_score
         composite = max(-100.0, min(100.0, composite))
 
         rec = "HOLD"
@@ -113,7 +126,7 @@ class UnifiedAnalysisEngine:
         )
         out = analysis.to_dict()
         # Emit factors for adaptive learning but do not persist them in DB
-        out.update({"factors": {"tech": tech_score, "fundamental": 0.0, "context": sent_score}, "weights": w.to_dict()})
+        out.update({"factors": {"tech": tech_score, "fundamental": fund_score, "context": sent_score}, "weights": w.to_dict()})
         await self.bus.publish("signals.analysis", out)
         rec = analysis.to_dict()
         # Persist reasons as text for SQLite

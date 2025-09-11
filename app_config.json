@@ -14,6 +14,8 @@
   "enable_orders": false,
   "alpaca_mode": "paper",
   "blackout_after_open_min": 30,
-  "blackout_before_close_min": 30
-}
+  "blackout_before_close_min": 30,
 
+  "fundamentals_enabled": true,
+  "fundamentals_limit": 50
+}

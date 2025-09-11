@@ -62,6 +62,10 @@ class Settings:
     blackout_after_open_min: int = 30
     blackout_before_close_min: int = 30
 
+    # Fundamentals
+    fundamentals_enabled: bool = True
+    fundamentals_limit: Optional[int] = 50
+
     @staticmethod
     def load(config_path: Optional[str] = None) -> "Settings":
         cfg = Settings()
@@ -108,5 +112,9 @@ class Settings:
         cfg.alpaca_mode = os.getenv("ALPACA_MODE", dget("alpaca_mode", cfg.alpaca_mode))
         cfg.blackout_after_open_min = _get_int("BLACKOUT_AFTER_OPEN_MIN", dget("blackout_after_open_min", cfg.blackout_after_open_min)) or cfg.blackout_after_open_min
         cfg.blackout_before_close_min = _get_int("BLACKOUT_BEFORE_CLOSE_MIN", dget("blackout_before_close_min", cfg.blackout_before_close_min)) or cfg.blackout_before_close_min
+
+        # Fundamentals
+        cfg.fundamentals_enabled = _get_bool("FUNDAMENTALS_ENABLED", dget("fundamentals_enabled", cfg.fundamentals_enabled))
+        cfg.fundamentals_limit = _get_int("FUNDAMENTALS_LIMIT", dget("fundamentals_limit", cfg.fundamentals_limit))
 
         return cfg
