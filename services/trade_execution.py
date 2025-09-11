@@ -65,8 +65,10 @@ class TradeExecutionManager:
         )
 
     async def _estimate_qty(self, symbol: str, pos_pct: float) -> int:
-        # placeholder: fixed portfolio of 100k
-        portfolio_value = 100_000.0
+        # Use last portfolio snapshot if available, fallback to 100k
+        from ..core.storage import query_one
+        row = query_one("SELECT total_value FROM portfolio ORDER BY ts DESC LIMIT 1")
+        portfolio_value = float(row[0]) if row and row[0] is not None else 100_000.0
         alloc = portfolio_value * (pos_pct / 100.0)
         price = await self._fetch_price(symbol)
         if price <= 0:

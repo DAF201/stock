@@ -48,6 +48,7 @@ class UnifiedAnalysisEngine:
         # scoring components (-100..100)
         tech_score = 0.0
         reasons: List[str] = []
+        price = ind.get("price")
         if ind.get("rsi") is not None:
             rsi = float(ind["rsi"])
             # RSI contrarian: oversold <30 -> +, overbought >70 -> -
@@ -64,6 +65,23 @@ class UnifiedAnalysisEngine:
             else:
                 tech_score -= 10
                 reasons.append("Bearish MA alignment")
+        # MACD
+        if ind.get("macd") is not None and ind.get("macd_signal") is not None:
+            if float(ind["macd"]) > float(ind["macd_signal"]):
+                tech_score += 10
+                reasons.append("MACD above signal")
+            else:
+                tech_score -= 10
+                reasons.append("MACD below signal")
+        # Bollinger Bands
+        if price is not None and ind.get("bb_upper") is not None and ind.get("bb_lower") is not None:
+            p = float(price)
+            if p < float(ind["bb_lower"]):
+                tech_score += 15
+                reasons.append("Price below lower Bollinger (oversold)")
+            elif p > float(ind["bb_upper"]):
+                tech_score -= 15
+                reasons.append("Price above upper Bollinger (overbought)")
 
         sent_score = 0.0
         if sent:
