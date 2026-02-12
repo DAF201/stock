@@ -1,0 +1,11 @@
+{
+    "base_url": "https://paper-api.alpaca.markets/v2",
+    "paper": {
+        "key": "",
+        "secret": ""
+    },
+    "live": {
+        "key": "",
+        "secret": ""
+    }
+}
